@@ -10,6 +10,7 @@ import org.apache.ibatis.cache.decorators.SynchronizedCache;
 import org.apache.ibatis.cache.impl.PerpetualCache;
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.ParameterMap;
@@ -20,6 +21,8 @@ import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.session.defaults.DefaultSqlSession;
 import org.apache.ibatis.sy.intercepts.SimpleInterceptor;
 import org.apache.ibatis.sy.mapper.TUserMapper;
@@ -116,5 +119,25 @@ public class SimpleInterceptorTest {
     TUserMapper tUserMapper = mapperProxyFactory.newInstance(sqlSession);
     TUser tUser1 = tUserMapper.selectByPrimaryKey(1);
     System.out.println(tUser);
+  }
+
+  private static SqlSessionFactory getSessionFactory() {
+    SqlSessionFactory sessionFactory = null;
+    String resource = "mybatisConfig.xml";
+    try {
+      sessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return sessionFactory;
+  }
+
+  @Test
+  public void findUserById() {
+    SqlSessionFactory sqlSessionFactory = getSessionFactory();
+    SqlSession sqlSession = sqlSessionFactory.openSession();
+    TUserMapper userMapper = sqlSession.getMapper(TUserMapper.class);
+    TUser user = userMapper.selectByPrimaryKey(1);
+    System.out.println(user.getId() + " /  " + user.getuNo());
   }
 }
